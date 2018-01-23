@@ -176,6 +176,9 @@ function processFileContents() {
         return requests;
     }).then(requests => {
         console.log("Requests are: ==========================", requests);
+    }).catch(err => {
+        console.log(err);
+        process.exit(1);
     });
 
 }
