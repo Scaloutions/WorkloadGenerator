@@ -1,71 +1,94 @@
+'use strict';
+
 var fs = require('fs'),
     path = require('path'),
     filePath = path.join(__dirname, '/workloads/1userWorkLoad.txt');
 
-module.exports = {
+var requests = [];
 
-    readFile: function() {
-        fs.readFile(filePath, { encoding: 'utf-8' }, function(err, data) {
-            if (!err) {
-                var allCommands = {};
-                console.log('received data: ' + data);
-                var lines = data.toString().split("\n");
-                console.log('\n\n\n\n length is:', lines.length);
-                lines.forEach(function(line, i) {
+function readFile() {
 
-                        var lineSplit = line.split(',');
-                        var commandAndNumberRegex = /(\[(\d*)\]) (\w*)/g;
-                        var commandNumber;
-                        var command;
-                        var commandNumberMatch = commandAndNumberRegex.exec(lineSplit[0]);
-                        var stock;
-                        var priceD;
-                        var priceC;
-                        if (commandNumberMatch && commandNumberMatch[2]) {
-                            commandNumber = commandNumberMatch[2]
+    fs.readFile(filePath, { encoding: 'utf-8' }, function(err, data) {
+        if (!err) {
+            var allCommands = {};
+            console.log('received data: ' + data);
+            var lines = data.toString().split("\n");
+            console.log('\n\n\n\n length is:', lines.length);
+            lines.forEach(function(line, i) {
 
-                            if (commandNumberMatch[3]) {
-                                command = commandNumberMatch[3];
-                            }
-                        }
+                var lineSplit = line.split(',');
+                var commandAndNumberRegex = /(\[(\d*)\]) (\w*)/g;
+                var commandNumber;
+                var command;
+                var commandNumberMatch = commandAndNumberRegex.exec(lineSplit[0]);
+                var stock;
+                var priceD;
+                var priceC;
+                var price;
+                if (commandNumberMatch && commandNumberMatch[2]) {
+                    commandNumber = commandNumberMatch[2]
 
-                        var userId = lineSplit[1];
-                        console.log('\n Line split length is: ', lineSplit.length);
-                        console.log(' Line split  is: ', lineSplit);
-                        console.log(' Command number is: ', commandNumber);
-                        console.log(' Command is: ', command);
-                        console.log(' User is: ', userId);
+                    if (commandNumberMatch[3]) {
+                        command = commandNumberMatch[3];
+                    }
+                }
+
+                var userId = lineSplit[1];
+                console.log('\n Line split length is: ', lineSplit.length);
+                console.log(' Line split  is: ', lineSplit);
+                console.log(' Command number is: ', commandNumber);
+                console.log(' Command is: ', command);
+                console.log(' User is: ', userId);
 
 
-                        if (lineSplit.length == 2) {
-                            // Info can be:
-                            //  Command + Username 
-                            //  Dumplog + filename
+                if (lineSplit.length == 2) {
+                    // Info can be:
+                    //  Command + Username 
+                    //  Dumplog + filename
 
-                        } else if (lineSplit.length == 3) {
-                            // Info can be:
-                            //  Command + Username + Stock 
-                            //  Command + Username + Price
+                } else if (lineSplit.length == 3) {
+                    // Info can be:
+                    //  Command + Username + Stock 
+                    //  Command + Username + Price
 
-                        } else if (lineSplit.length == 4) {
-                            // Info can be:
-                            //  Command + Username + Stock + Price
-                            stock = lineSplit[2]
-                            console.log(' Stock is: ', stock);
-                            console.log(splitPrice(lineSplit[3]));
-                        }
+                } else if (lineSplit.length == 4) {
+                    // Info can be:
+                    //  Command + Username + Stock + Price
+                    stock = lineSplit[2]
+                    console.log(' Stock is: ', stock);
+                    price = splitPrice(lineSplit[3]);
+                    console.log(price);
+                    priceD = price.dollars;
+                    priceC = price.cents;
+                }
 
-                    })
-                    // response.writeHead(200, {'Content-Type': 'text/html'});
-                    // response.write(data);
-                    // response.end();
-            } else {
-                console.log(err);
-            }
-        });
-    }
+                var request = {
+                    command: command,
+                    stock: stock,
+                    userId: userId,
+                    priceD: priceD,
+                    priceC: priceC
+                };
 
-};
+                console.log(' Request is: ', request);
+
+                requests.push(request);
+                // console.log(requests);
+
+            })
+
+            // response.writeHead(200, {'Content-Type': 'text/html'});
+            // response.write(data);
+            // response.end();
+        } else {
+            console.log(err);
+        }
+
+    });
+
+    console.log(requests.length);
+    return requests;
+}
 
 function splitPrice(price) {
     var priceSplitRegex = /(\d*)(\.*)(\d*)/g;
@@ -80,3 +103,9 @@ function splitPrice(price) {
 
     return price;
 }
+
+module.exports = {
+
+    readFile: readFile
+
+};

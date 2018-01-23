@@ -12,9 +12,10 @@ module.exports = function(app, express) {
 
     apiRouter.get('/userload1', function(req, res) {
 
-        services.readFile();
+        var requests = services.readFile();
+        console.log('Requests are: ', requests);
 
-        res.json({ testing: 'This is testing 1 user' })
+        res.json({ testing: 'This is testing 1 user' });
     })
 
     return apiRouter;
