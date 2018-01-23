@@ -12,7 +12,8 @@ module.exports = function(app, express) {
 
     apiRouter.get('/userload1', function(req, res) {
 
-        var requests = services.readFile();
+        // var requests = services.readFile();
+        var requests = services.processFileContents();
         console.log('Requests are: ', requests);
 
         res.json({ testing: 'This is testing 1 user' });
