@@ -4,7 +4,8 @@ var fs = require('fs'),
     path = require('path'),
     filePath = path.join(__dirname, '/workloads/1userWorkLoad.txt');
 
-var Promise = require('promise');
+var Promise = require('promise'),
+    Threads = require('webworker-threads');
 
 var requests = [];
 
@@ -165,7 +166,6 @@ function processFileContents() {
             };
 
             console.log(' Request is: ', request);
-
             requests.push(request);
 
         })
@@ -174,11 +174,41 @@ function processFileContents() {
         // response.write(data);
         // response.end();
         return requests;
+
     }).then(requests => {
-        console.log("Requests are: ==========================", requests);
+
+        sendRequests(requests);
+
     }).catch(err => {
         console.log(err);
         process.exit(1);
+    });
+
+}
+
+function sendRequest(request) {
+    // TODO: //////////////////////////////////////////////////////////
+    console.log(request.command);
+}
+
+function sendRequests(requests) {
+
+    var numofRequests = requests.length;
+    console.log("The number of requests are: ", numofRequests);
+
+    var numOfThreads = 10;
+    var threadsPool = Threads.createPool(numOfThreads);
+
+    requests.forEach((request, index) => {
+        (function(request) {
+            // dispatch each request to the first available thread
+            threadsPool.any.eval('sendRequest(' + request + ')', function(err, val) {
+
+                if (request && request.command) sendRequest(request);
+                // destroy the pool when all results have been produced
+                if (index == numofRequests - 1) console.log('bye!'), threadsPool.destroy();
+            });
+        })(request);
     });
 
 }
@@ -199,7 +229,7 @@ function splitPrice(price) {
 
 module.exports = {
 
-    readFile: readFile,
+    // readFile: readFile,
     processFileContents: processFileContents
 
 };
