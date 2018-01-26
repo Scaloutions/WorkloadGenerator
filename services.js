@@ -60,63 +60,7 @@ function processFileContents() {
     stockRequest.PriceCents = price.cents;
 
     commandRequestsArray.push(stockRequest)
-
-    // var reqOptions = {
-    //   method: 'POST',
-    //   uri: 'http://localhost:9090/api/' + stockRequest.Command.toLowerCase(),
-    //   body: {
-    //     userid: stockRequest.UserId,
-    //     priceDollars: parseFloat(price.dollars),
-    //     stock: stockRequest.Stock,
-    //     command: stockRequest.Command,
-    //     commandNumber: parseInt(stockRequest.CommandNumber)
-    //   },
-    //   json: true
-    // }
-
-    // var reqOptions = {
-    //   method: 'GET',
-    //   uri: 'http://localhost:9090/' + stockRequest.Command + stockRequest.CommandNumber,
-    //   json: true
-    // }
-
-    // console.log('######## CALLING HTTP', 'http://localhost:9090/api/' + stockRequest.Command.toLowerCase());
-    // request(reqOptions, function (error, response, body) {
-    //   if (response.statusCode == 201) {
-    //     console.log('how tho')
-    //   } else {
-    //     // console.log('\n error: '+ JSON.stringify(response))
-    //     console.log('\n res: ' + response.statusCode);
-
-    //     // console.log(body)
-    //   }
-    // })
-
-    // console.log('######## DONE CALLING CALLING HTTP', stockRequest.CommandNumber);
-
-    // httpstockRequest(reqOptions)
-    //   .then(function(result) {
-    //     console.log('a promise returned');
-    //   })
-    //   .catch(function(err) {
-    //     console.log('a promise returned an erroe');
-
-    //   })
-    // httpRequests.push(httpRequest(reqOptions));
-
-    // httpRequest(reqOptions)
-    //   .then(function(results) {
-    //     console.log('\n\n ## Results', results)
-    //   })
-    //   .error(function(err) {
-    //     console.log(err)
-    //   })
   })
-
-  // response.writeHead(200, {'Content-Type': 'text/html'});
-  // response.write(data);
-  // response.end();
-  // return requests;
 
   console.log('###### CALLING SEQUENTIAL HTTP EXECUTION')
   sequentialPromiseExecution(commandRequestsArray, 0);
@@ -131,7 +75,7 @@ function sequentialPromiseExecution(commandRequestsArray, index) {
   var commandRequest = commandRequestsArray[index];
   var reqOptions = {
     method: 'POST',
-    uri: 'http://localhost:9090/api/' + commandRequest.Command.toLowerCase() + commandRequest.CommandNumber,
+    uri: 'http://localhost:9090/api/' + commandRequest.Command.toLowerCase(),
     body: {
       userid: commandRequest.UserId,
       priceDollars: parseFloat(commandRequest.PriceDollars),
