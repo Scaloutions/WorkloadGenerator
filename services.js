@@ -35,7 +35,9 @@ function processFileContents() {
     getCommandDetails(lineSplit[0], stockRequest);
     stockRequest.UserId = lineSplit[1];
 
-    if (lineSplit.length == 3) {
+    if (lineSplit.length == 2) {
+      // add code for dumplog
+    } else if (lineSplit.length == 3) {
       // Info can be:
       //  Command + Username + Stock 
       //  Command + Username + Price
