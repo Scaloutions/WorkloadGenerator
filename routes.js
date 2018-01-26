@@ -11,11 +11,16 @@ module.exports = function(app, express) {
     })
 
     apiRouter.get('/userload1', function(req, res) {
-
         services.processFileContents();
 
         res.json({ testing: 'This is testing 1 user' });
     })
+
+    apiRouter.route('/')
+        .post(function(req, res) {
+            // console.log('This is command number', req.body);
+            res.json(req.body);
+        })
 
     return apiRouter;
 }
