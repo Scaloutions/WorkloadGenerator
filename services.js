@@ -32,7 +32,7 @@ function processFileContents() {
   });
 
   totalLines.forEach(function (line, i) {
-    var lineSplit = line.split(',');
+    var lineSplit = line.trim().split(',');
     var stockRequest = {};
     var price = {};
 
@@ -74,7 +74,6 @@ function processFileContents() {
     commandRequestsArray.push(stockRequest)
   })
 
-  console.log('###### CALLING SEQUENTIAL HTTP EXECUTION')
   sequentialPromiseExecution(commandRequestsArray, 0);
 }
 
