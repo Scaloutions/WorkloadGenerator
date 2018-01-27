@@ -1,235 +1,130 @@
 'use strict';
 
 var fs = require('fs'),
-    path = require('path'),
-    filePath = path.join(__dirname, '/workloads/1userWorkLoad.txt');
-
-var Promise = require('promise'),
-    Threads = require('webworker-threads');
-
-var requests = [];
-
-function readFile() {
-
-    fs.readFile(filePath, { encoding: 'utf-8' }, function(err, data) {
-        if (!err) {
-            var allCommands = {};
-            console.log('received data: ' + data);
-            var lines = data.toString().split("\n");
-            console.log('\n\n\n\n length is:', lines.length);
-            lines.forEach(function(line, i) {
-
-                var lineSplit = line.split(',');
-                var commandAndNumberRegex = /(\[(\d*)\]) (\w*)/g;
-                var commandNumber;
-                var command;
-                var commandNumberMatch = commandAndNumberRegex.exec(lineSplit[0]);
-                var stock;
-                var priceD;
-                var priceC;
-                var price;
-                if (commandNumberMatch && commandNumberMatch[2]) {
-                    commandNumber = commandNumberMatch[2]
-
-                    if (commandNumberMatch[3]) {
-                        command = commandNumberMatch[3];
-                    }
-                }
-
-                var userId = lineSplit[1];
-                console.log('\n Line split length is: ', lineSplit.length);
-                console.log(' Line split  is: ', lineSplit);
-                console.log(' Command number is: ', commandNumber);
-                console.log(' Command is: ', command);
-                console.log(' User is: ', userId);
-
-
-                if (lineSplit.length == 2) {
-                    // Info can be:
-                    //  Command + Username 
-                    //  Dumplog + filename
-
-                } else if (lineSplit.length == 3) {
-                    // Info can be:
-                    //  Command + Username + Stock 
-                    //  Command + Username + Price
-
-                } else if (lineSplit.length == 4) {
-                    // Info can be:
-                    //  Command + Username + Stock + Price
-                    stock = lineSplit[2]
-                    console.log(' Stock is: ', stock);
-                    price = splitPrice(lineSplit[3]);
-                    console.log(price);
-                    priceD = price.dollars;
-                    priceC = price.cents;
-                }
-
-                var request = {
-                    command: command,
-                    stock: stock,
-                    userId: userId,
-                    priceD: priceD,
-                    priceC: priceC
-                };
-
-                console.log(' Request is: ', request);
-
-                requests.push(request);
-                // console.log(requests);
-
-            })
-
-            // response.writeHead(200, {'Content-Type': 'text/html'});
-            // response.write(data);
-            // response.end();
-        } else {
-            console.log(err);
-        }
-
-    });
-
-    return requests;
-}
+  path = require('path'),
+  request = require('request'),
+  config = require('./config'),
+  Promise = require('promise'),
+  Threads = require('webworker-threads'),
+  httpRequest = require('request-promise'),
+  filePath = path.join(__dirname, '/workloads/1userWorkLoad.txt');
 
 function generateRequestFromFile() {
-    return new Promise((resolve, reject) => {
-        fs.readFile(filePath, (err, data) => {
-            if (err) {
-                return reject(err);
-            }
-            resolve(data);
-        });
+  return new Promise((resolve, reject) => {
+    fs.readFileSync(filePath, (err, data) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(data);
     });
+  });
 }
 
 function processFileContents() {
-    generateRequestFromFile().then(data => {
-        var allCommands = {};
-        console.log('received data: ' + data);
-        var lines = data.toString().split("\n");
-        console.log('\n\n\n\n length is:', lines.length);
-        lines.forEach(function(line, i) {
+  var data = fs.readFileSync(filePath);
+  var commandRequestsArray = [];
+  var totalLines = data.toString().split("\n");
+  console.log('\n Total Commands:', totalLines.length);
 
-            var lineSplit = line.split(',');
-            var commandAndNumberRegex = /(\[(\d*)\]) (\w*)/g;
-            var commandNumber;
-            var command;
-            var commandNumberMatch = commandAndNumberRegex.exec(lineSplit[0]);
-            var stock;
-            var priceD;
-            var priceC;
-            var price;
-            if (commandNumberMatch && commandNumberMatch[2]) {
-                commandNumber = commandNumberMatch[2]
+  totalLines.forEach(function (line, i) {
+    var lineSplit = line.split(',');
+    var stockRequest = {};
+    var price = {};
 
-                if (commandNumberMatch[3]) {
-                    command = commandNumberMatch[3];
-                }
-            }
+    // Get stockRequest details
+    getCommandDetails(lineSplit[0], stockRequest);
+    stockRequest.UserId = lineSplit[1];
 
-            var userId = lineSplit[1];
-            console.log('\n Line split length is: ', lineSplit.length);
-            console.log(' Line split  is: ', lineSplit);
-            console.log(' Command number is: ', commandNumber);
-            console.log(' Command is: ', command);
-            console.log(' User is: ', userId);
+    if (lineSplit.length == 2) {
+      // add code for dumplog
+    } else if (lineSplit.length == 3) {
+      // Info can be:
+      //  Command + Username + Stock 
+      //  Command + Username + Price
+      var stockNameRegex = /([a-zA-Z][a-zA-Z ]{1,2})/g;
+      var stockNameMatch = stockNameRegex.exec(lineSplit[2]);
 
+      if (stockNameMatch && stockNameMatch[0].length <= 3) {
+        stockRequest.Stock = stockNameMatch[0];
+      } else {
+        price = splitPrice(lineSplit[2]);
+      }
+    } else if (lineSplit.length == 4) {
+      // Info can be:
+      //  Command + Username + Stock + Price
+      stockRequest.Stock = lineSplit[2]
+      price = splitPrice(lineSplit[3]);
+    }
 
-            if (lineSplit.length == 2) {
-                // Info can be:
-                //  Command + Username 
-                //  Dumplog + filename
+    stockRequest.PriceDollars = price.dollars;
+    stockRequest.PriceCents = price.cents;
 
-            } else if (lineSplit.length == 3) {
-                // Info can be:
-                //  Command + Username + Stock 
-                //  Command + Username + Price
+    commandRequestsArray.push(stockRequest)
+  })
 
-            } else if (lineSplit.length == 4) {
-                // Info can be:
-                //  Command + Username + Stock + Price
-                stock = lineSplit[2]
-                console.log(' Stock is: ', stock);
-                price = splitPrice(lineSplit[3]);
-                console.log(price);
-                priceD = price.dollars;
-                priceC = price.cents;
-            }
-
-            var request = {
-                command: command,
-                stock: stock,
-                userId: userId,
-                priceD: priceD,
-                priceC: priceC
-            };
-
-            console.log(' Request is: ', request);
-            requests.push(request);
-
-        })
-
-        // response.writeHead(200, {'Content-Type': 'text/html'});
-        // response.write(data);
-        // response.end();
-        return requests;
-
-    }).then(requests => {
-
-        sendRequests(requests);
-
-    }).catch(err => {
-        console.log(err);
-        process.exit(1);
-    });
-
+  console.log('###### CALLING SEQUENTIAL HTTP EXECUTION')
+  sequentialPromiseExecution(commandRequestsArray, 0);
 }
 
-function sendRequest(request) {
-    // TODO: //////////////////////////////////////////////////////////
-    console.log(request.command);
+function sequentialPromiseExecution(commandRequestsArray, index) {
+  if (index >= commandRequestsArray.length) {
+    console.log('### Reached end of requests!')
+    return;
+  }
+  // console.log('Looking at request: ', commandRequestsArray[index], index)
+  var commandRequest = commandRequestsArray[index];
+  var reqOptions = {
+    method: 'POST',
+    uri: 'http://localhost:9090/api/' + commandRequest.Command.toLowerCase(),
+    body: {
+      userid: commandRequest.UserId,
+      priceDollars: parseFloat(commandRequest.PriceDollars),
+      stock: commandRequest.Stock,
+      command: commandRequest.Command,
+      commandNumber: parseInt(commandRequest.CommandNumber)
+    },
+    json: true
+  }
+
+  httpRequest(reqOptions)
+    .then(function (result) {
+      // if (result.statusCode == 200) {
+        console.log('Results are:', result)
+        sequentialPromiseExecution(commandRequestsArray, index + 1)
+      // }
+    })
+    .catch(function (err) {
+        console.log('#ERROR')
+    })
 }
 
-function sendRequests(requests) {
+function getCommandDetails(firstSplitParam, request) {
+  var commandAndNumberRegex = /(\[(\d*)\]) (\w*)/g;
+  var commandNumberMatch = commandAndNumberRegex.exec(firstSplitParam);
+  if (commandNumberMatch && commandNumberMatch[2]) {
+    request.CommandNumber = commandNumberMatch[2]
 
-    var numofRequests = requests.length;
-    console.log("The number of requests are: ", numofRequests);
-
-    var numOfThreads = 10;
-    var threadsPool = Threads.createPool(numOfThreads);
-
-    requests.forEach((request, index) => {
-        (function(request) {
-            // dispatch each request to the first available thread
-            threadsPool.any.eval('sendRequest(' + request + ')', function(err, val) {
-
-                if (request && request.command) sendRequest(request);
-                // destroy the pool when all results have been produced
-                if (index == numofRequests - 1) console.log('bye!'), threadsPool.destroy();
-            });
-        })(request);
-    });
-
+    if (commandNumberMatch[3]) {
+      request.Command = commandNumberMatch[3];
+    }
+  }
 }
 
 function splitPrice(price) {
-    var priceSplitRegex = /(\d*)(\.*)(\d*)/g;
-    var priceMatch = priceSplitRegex.exec(price);
-    // console.log(price)
-    var price = {};
-    price.dollars = priceMatch[1];
+  var priceSplitRegex = /(\d*)(\.*)(\d*)/g;
+  var priceMatch = priceSplitRegex.exec(price);
+  // console.log(price)
+  var price = {};
+  price.dollars = priceMatch[1];
 
-    if (priceMatch[2] && priceMatch[3]) {
-        price.cents = priceMatch[3]
-    }
+  if (priceMatch[2] && priceMatch[3]) {
+    price.cents = priceMatch[3]
+  }
 
-    return price;
+  return price;
 }
 
 module.exports = {
-
-    // readFile: readFile,
-    processFileContents: processFileContents
+  processFileContents: processFileContents
 
 };
