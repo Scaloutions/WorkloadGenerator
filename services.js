@@ -26,38 +26,50 @@ function processFileContents() {
   var totalLines = data.toString().split("\n");
   console.log('\n Total Commands:', totalLines.length);
 
+  commandRequestsArray.push({
+    UserId: 'oY01WVirLr',
+    Command: 'authenticate'
+  });
+
   totalLines.forEach(function (line, i) {
     var lineSplit = line.split(',');
     var stockRequest = {};
     var price = {};
 
-    // Get stockRequest details
-    getCommandDetails(lineSplit[0], stockRequest);
+    // Constructing Command Details
+
+    // Set command name and number
+    setCommandDetails(lineSplit[0], stockRequest);
+
+    // Set user id
     stockRequest.UserId = lineSplit[1];
 
-    if (lineSplit.length == 2) {
-      // add code for dumplog
-    } else if (lineSplit.length == 3) {
+    if (lineSplit.length == 3) {
       // Info can be:
       //  Command + Username + Stock 
       //  Command + Username + Price
+
+      // Match for stock or price
       var stockNameRegex = /([a-zA-Z][a-zA-Z ]{1,2})/g;
       var stockNameMatch = stockNameRegex.exec(lineSplit[2]);
-
       if (stockNameMatch && stockNameMatch[0].length <= 3) {
+        // Set stock name
         stockRequest.Stock = stockNameMatch[0];
       } else {
+        // Set price amount in dollars and cents
         price = splitPrice(lineSplit[2]);
+        stockRequest.PriceDollars = price.dollars;
+        stockRequest.PriceCents = price.cents;
       }
     } else if (lineSplit.length == 4) {
       // Info can be:
       //  Command + Username + Stock + Price
+      // Set stock and price in dollars and cents
       stockRequest.Stock = lineSplit[2]
       price = splitPrice(lineSplit[3]);
+      stockRequest.PriceDollars = price.dollars;
+      stockRequest.PriceCents = price.cents;
     }
-
-    stockRequest.PriceDollars = price.dollars;
-    stockRequest.PriceCents = price.cents;
 
     commandRequestsArray.push(stockRequest)
   })
@@ -71,11 +83,12 @@ function sequentialPromiseExecution(commandRequestsArray, index) {
     console.log('### Reached end of requests!')
     return;
   }
-  // console.log('Looking at request: ', commandRequestsArray[index], index)
   var commandRequest = commandRequestsArray[index];
+  console.log('Looking at request: ', commandRequestsArray[index], 'Calling: http://localhost:9090/api/' + commandRequest.Command)
+  
   var reqOptions = {
     method: 'POST',
-    uri: 'http://localhost:9090/api/' + commandRequest.Command.toLowerCase(),
+    uri: 'http://localhost:9090/api/' + commandRequest.Command,
     body: {
       userid: commandRequest.UserId,
       priceDollars: parseFloat(commandRequest.PriceDollars),
@@ -89,23 +102,23 @@ function sequentialPromiseExecution(commandRequestsArray, index) {
   httpRequest(reqOptions)
     .then(function (result) {
       // if (result.statusCode == 200) {
-        console.log('Results are:', result)
-        sequentialPromiseExecution(commandRequestsArray, index + 1)
+      console.log('Results are:', result)
+      sequentialPromiseExecution(commandRequestsArray, index + 1)
       // }
     })
     .catch(function (err) {
-        console.log('#ERROR')
+      console.log('#ERROR', err)
     })
 }
 
-function getCommandDetails(firstSplitParam, request) {
+function setCommandDetails(firstSplitParam, request) {
   var commandAndNumberRegex = /(\[(\d*)\]) (\w*)/g;
   var commandNumberMatch = commandAndNumberRegex.exec(firstSplitParam);
   if (commandNumberMatch && commandNumberMatch[2]) {
     request.CommandNumber = commandNumberMatch[2]
 
     if (commandNumberMatch[3]) {
-      request.Command = commandNumberMatch[3];
+      request.Command = commandNumberMatch[3].toLowerCase();
     }
   }
 }
@@ -126,5 +139,4 @@ function splitPrice(price) {
 
 module.exports = {
   processFileContents: processFileContents
-
 };
