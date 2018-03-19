@@ -7,7 +7,8 @@ var fs = require('fs'),
   Promise = require('promise'),
   Threads = require('webworker-threads'),
   httpRequest = require('request-promise'),
-  filePath = path.join(__dirname, '/workloads/1userWorkLoad.txt');
+  _ = require('underscore');
+  
 
 function generateRequestFromFile() {
   return new Promise((resolve, reject) => {
@@ -20,7 +21,30 @@ function generateRequestFromFile() {
   });
 }
 
-function processFileContents() {
+function processFileContents(numberOfUsers) {
+  var filePath;
+  switch (numberOfUsers) {
+    case 1:
+      console.log('User load: 1');
+      filePath = path.join(__dirname, config.OneUserWorkLoadPath)
+      break;
+    case 10:
+      console.log('User load: 10');
+      filePath = path.join(__dirname, config.TenUserWorkLoadPath)
+      break;
+    case 45:
+      console.log('User load: 45');
+      filePath = path.join(__dirname, config.FortyFiveUserWorkLoadPath)
+      break;
+    case 1000:
+      console.log('User load: 1000');
+      filePath = path.join(__dirname, config.ThousandUserWorkLoadPath)
+      break;
+    default:
+      filePath = path.join(__dirname, config.OneUserWorkLoadPath)
+  }
+
+
   var data = fs.readFileSync(filePath);
   var commandRequestsArray = [];
   var totalLines = data.toString().split("\n");
@@ -41,7 +65,6 @@ function processFileContents() {
     // Set command name and number
     setCommandDetails(lineSplit[0], stockRequest);
 
-    // Set user id
     stockRequest.UserId = lineSplit[1];
 
     if (lineSplit.length == 3) {
