@@ -16,6 +16,12 @@ module.exports = function(app, express) {
         res.json({ testing: 'This is testing 1 user' });
     })
 
+    apiRouter.get('/userload2', function(req, res) {
+        services.processFileContents(2);
+
+        res.json({ testing: 'This is testing 1 user' });
+    })
+
     apiRouter.get('/userload10', function(req, res) {
         services.processFileContents(10);
 

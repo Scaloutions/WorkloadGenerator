@@ -28,6 +28,10 @@ function processFileContents(numberOfUsers) {
       console.log('User load: 1');
       filePath = path.join(__dirname, config.OneUserWorkLoadPath)
       break;
+    case 2:
+      console.log('User load: 2');
+      filePath = path.join(__dirname, config.TwoUserWorkLoadPath)
+      break;
     case 10:
       console.log('User load: 10');
       filePath = path.join(__dirname, config.TenUserWorkLoadPath)
@@ -50,10 +54,10 @@ function processFileContents(numberOfUsers) {
   var totalLines = data.toString().split("\n");
   console.log('\n Total Commands:', totalLines.length);
 
-  commandRequestsArray.push({
-    UserId: 'oY01WVirLr',
-    Command: 'authenticate'
-  });
+  // commandRequestsArray.push({
+  //   UserId: 'oY01WVirLr',
+  //   Command: 'authenticate'
+  // });
 
   totalLines.forEach(function (line, i) {
     var lineSplit = line.trim().split(',');
