@@ -5,7 +5,6 @@ var fs = require('fs'),
   request = require('request'),
   config = require('./config'),
   Promise = require('promise'),
-  Threads = require('webworker-threads'),
   httpRequest = require('request-promise'),
   _ = require('underscore');
   
