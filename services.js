@@ -23,6 +23,7 @@ function generateRequestFromFile() {
 
 function processFileContents(numberOfUsers) {
   var filePath;
+  var parseLogs = false;
   switch (numberOfUsers) {
     case 1:
       console.log('User load: 1');
@@ -36,10 +37,22 @@ function processFileContents(numberOfUsers) {
       console.log('User load: 45');
       filePath = path.join(__dirname, config.FortyFiveUserWorkLoadPath)
       break;
+    case 100:
+      console.log('User load: 100');
+      filePath = path.join(__dirname, config.HundredUserWorkLoadPath)
+      break;
     case 1000:
       console.log('User load: 1000');
       filePath = path.join(__dirname, config.ThousandUserWorkLoadPath)
       break;
+    case "final":
+      console.log('User load: final work load');
+      filePath = path.join(__dirname, config.FinalUserWorkLoadPath)
+      break;
+    case "parse":
+      console.log('parsing input file')
+      filePath = path.join(__dirname, '10UserLogs')
+      parseLogs = true
     default:
       filePath = path.join(__dirname, config.OneUserWorkLoadPath)
   }
@@ -85,54 +98,12 @@ function processFileContents(numberOfUsers) {
         stockRequest.PriceDollars = price.dollars;
         stockRequest.PriceCents = price.cents;
       }
-    } else if (lineSplit.length == 4) {
-      // Info can be:
-      //  Command + Username + Stock + Price
-      // Set stock and price in dollars and cents
-      stockRequest.Stock = lineSplit[2]
-      price = splitPrice(lineSplit[3]);
-      stockRequest.PriceDollars = price.dollars;
-      stockRequest.PriceCents = price.cents;
-    }
 
-    commandRequestsArray.push(stockRequest)
-  })
+      commandRequestsArray.push(stockRequest)
+    })
 
-}
-
-    // Get stockRequest details
-    getCommandDetails(lineSplit[0], stockRequest);
-    stockRequest.UserId = lineSplit[1];
-
-    if (lineSplit.length == 2) {
-      // add code for dumplog
-    } else if (lineSplit.length == 3) {
-      // Info can be:
-      //  Command + Username + Stock 
-      //  Command + Username + Price
-      var stockNameRegex = /([a-zA-Z][a-zA-Z ]{1,2})/g;
-      var stockNameMatch = stockNameRegex.exec(lineSplit[2]);
-
-      if (stockNameMatch && stockNameMatch[0].length <= 3) {
-        stockRequest.Stock = stockNameMatch[0];
-      } else {
-        price = splitPrice(lineSplit[2]);
-      }
-    } else if (lineSplit.length == 4) {
-      // Info can be:
-      //  Command + Username + Stock + Price
-      stockRequest.Stock = lineSplit[2]
-      price = splitPrice(lineSplit[3]);
-    }
-
-    stockRequest.PriceDollars = price.dollars;
-    stockRequest.PriceCents = price.cents;
-
-    commandRequestsArray.push(stockRequest)
-  })
-
-  console.log('###### CALLING SEQUENTIAL HTTP EXECUTION')
-  sequentialPromiseExecution(commandRequestsArray, 0);
+    sequentialPromiseExecution(commandRequestsArray, 0);
+  }
 }
 
 function sequentialPromiseExecution(commandRequestsArray, index) {
