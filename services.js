@@ -39,10 +39,22 @@ function processFileContents(numberOfUsers) {
       console.log('User load: 45');
       filePath = path.join(__dirname, config.FortyFiveUserWorkLoadPath)
       break;
+    case 100:
+      console.log('User load: 100');
+      filePath = path.join(__dirname, config.HundredUserWorkLoadPath)
+      break;
     case 1000:
       console.log('User load: 1000');
       filePath = path.join(__dirname, config.ThousandUserWorkLoadPath)
       break;
+    case "final":
+      console.log('User load: final work load');
+      filePath = path.join(__dirname, config.FinalUserWorkLoadPath)
+      break;
+    case "parse":
+      console.log('parsing input file')
+      filePath = path.join(__dirname, '10UserLogs')
+      parseLogs = true
     default:
       filePath = path.join(__dirname, config.OneUserWorkLoadPath)
   }
