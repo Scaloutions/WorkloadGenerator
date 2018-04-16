@@ -7,7 +7,7 @@ module.exports = {
   'TenUserWorkLoadPath': '/workloads/10User_testWorkLoad.txt',
   'FortyFiveUserWorkLoadPath': '/workloads/45User_testWorkLoad.txt',
   'HundredUserWorkLoadPath': '/workloads/100User_testWorkLoad.txt',
-  'ThousandUserWorkLoadPath': '/workloads/1000User_testWorkLoad',
+  'ThousandUserWorkLoadPath': '/workloads/1000User_testWorkLoad.txt',
   'FinalUserWorkLoadPath': '/workloads/final_workload_2018.txt',
   'ParseLogs': '/workloads/10UserLogs.xml'
 };
