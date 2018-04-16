@@ -1,0 +1,11 @@
+version: '3.4'
+
+services:
+    requestprocessing:
+      # build: .
+      image: workloadgenerator:scaloutions
+      restart: always
+      ports: 
+        - "8080:8080"
+      extra_hosts:
+        requestprocessingserver: 192.168.1.137

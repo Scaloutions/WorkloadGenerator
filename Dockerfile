@@ -8,6 +8,8 @@ WORKDIR /usr/src/app
 # where available (npm@5+)
 COPY package*.json ./
 
+RUN ["apt-get", "update"]
+RUN ["apt-get", "install", "-y", "vim"]
 RUN npm install
 # RUN npm install --only=production
 
