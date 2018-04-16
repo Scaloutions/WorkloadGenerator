@@ -66,7 +66,7 @@ function processFileContents(numberOfUsers) {
   var commandRequestsArray = [];
   var totalLines = data.toString().split("\n");
 
-  if (parseLogs = true) {
+  if (parseLogs == true) {
     console.log('Parsinglog file')
     var transactionNumberMap = {}
     var TNArray
