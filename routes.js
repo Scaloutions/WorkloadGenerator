@@ -16,6 +16,12 @@ module.exports = function(app, express) {
         res.json({ testing: 'This is testing 1 user' });
     })
 
+    apiRouter.get('/userload2', function(req, res) {
+        services.processFileContents(2);
+
+        res.json({ testing: 'This is testing 2 users' });
+    })
+
     apiRouter.get('/userload10', function(req, res) {
         services.processFileContents(10);
 
@@ -25,13 +31,31 @@ module.exports = function(app, express) {
     apiRouter.get('/userload45', function(req, res) {
         services.processFileContents(45);
 
-        res.json({ testing: 'This is testing 1000 users' });
+        res.json({ testing: 'This is testing 45 users' });
+    })
+
+    apiRouter.get('/userload100', function(req, res) {
+      services.processFileContents(100);
+
+      res.json({ testing: 'This is testing 100 users' });
     })
 
     apiRouter.get('/userload1000', function(req, res) {
         services.processFileContents(1000);
 
         res.json({ testing: 'This is testing 1000 users' });
+    })
+
+    apiRouter.get('/userloadFinal', function(req, res) {
+      services.processFileContents("final");
+
+      res.json({ testing: 'This is testing final user workload' });
+    })
+
+    apiRouter.get('/parseLogs', function(req, res) {
+      services.processFileContents("parse");
+
+      res.json({ testing: 'This is parsing logs' });
     })
 
     apiRouter.route('/')
