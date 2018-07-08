@@ -155,7 +155,7 @@ function sequentialPromiseExecution(commandRequestsArray, index) {
   
   var reqOptions = {
     method: 'POST',
-    uri: 'http://localhost:'+ config.RPSPort + '/api/' + commandRequest.Command.toLowerCase(),
+    uri: 'http://requestprocessingserver:'+ config.RPSPort + '/api/' + commandRequest.Command.toLowerCase(),
     // uri: 'http://192.168.1.137:'+ config.RPSPort + '/api/' + commandRequest.Command,
     body: {
       userid: commandRequest.UserId,
