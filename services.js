@@ -151,11 +151,11 @@ function sequentialPromiseExecution(commandRequestsArray, index) {
     return;
   }
   var commandRequest = commandRequestsArray[index];
-  console.log('Looking at request: ', commandRequestsArray[index], 'Calling: http://localhost:' + config.RPSPort + '/api/' + commandRequest.Command)
+  console.log('Looking at request: ', commandRequestsArray[index], 'Calling: requestprocessingserver:' + config.RPSPort + '/api/' + commandRequest.Command)
   
   var reqOptions = {
     method: 'POST',
-    uri: 'http://localhost:'+ config.RPSPort + '/api/' + commandRequest.Command.toLowerCase(),
+    uri: 'http://requestprocessingserver:'+ config.RPSPort + '/api/' + commandRequest.Command.toLowerCase(),
     // uri: 'http://192.168.1.137:'+ config.RPSPort + '/api/' + commandRequest.Command,
     body: {
       userid: commandRequest.UserId,
